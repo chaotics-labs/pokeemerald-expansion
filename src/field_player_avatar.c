@@ -35,6 +35,8 @@
 #include "constants/moves.h"
 #include "constants/songs.h"
 #include "constants/trainer_types.h"
+#include "data.h"
+#include "link.h"
 
 #define NUM_FORCED_MOVEMENTS 22
 #define NUM_ACRO_BIKE_COLLISIONS 5
@@ -1585,9 +1587,16 @@ u16 GetRivalAvatarGraphicsIdByStateIdAndGender(u8 state, enum Gender gender)
         return sRivalAvatarGfxIds[state][gender];
 }
 
+u16 GetPlayerAvatarGraphicsIdByOutfitStateIdAndGender(u8 outfit, u8 state, u8 gender)
+{
+    if (outfit > 0 && outfit < OUTFIT_COUNT)
+        return gOutfits[outfit].avatarGfxIds[state][gender];
+    return sPlayerAvatarGfxIds[state][gender];
+}
+
 u16 GetPlayerAvatarGraphicsIdByStateIdAndGender(u8 state, enum Gender gender)
 {
-    return sPlayerAvatarGfxIds[state][gender];
+    return GetPlayerAvatarGraphicsIdByOutfitStateIdAndGender(gSaveBlock2Ptr->currOutfitId, state, gender);
 }
 
 u16 GetFRLGAvatarGraphicsIdByGender(enum Gender gender)
@@ -2267,4 +2276,17 @@ bool8 ObjectMovingOnRockStairs(struct ObjectEvent *objectEvent, enum Direction d
     #else
         return FALSE;
     #endif
+}
+
+void SetPlayerAvatarVsSeeker(void)
+{
+    SetPlayerAvatarFieldMove();
+}
+
+u8 GetLinkPlayerAvatarGraphicsIdByStateIdLinkIdAndGender(u8 state, u8 linkId, u8 gender)
+{
+    u8 outfitId = gLinkPlayers[linkId].currOutfitId;
+    if (outfitId > 0 && outfitId < OUTFIT_COUNT)
+        return gOutfits[outfitId].avatarGfxIds[state][gender];
+    return sPlayerAvatarGfxIds[state][gender];
 }

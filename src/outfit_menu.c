@@ -462,8 +462,8 @@ static bool32 SetupOutfitMenu_Graphics(void)
     case 1:
         if (FreeTempTileDataBuffersIfPossible() != TRUE)
         {
-            LZDecompressWram(sTilemap, sOutfitMenu->tilemapBuffers[0]);
-            LZDecompressWram(sScrollingBG_Tilemap, sOutfitMenu->tilemapBuffers[1]);
+            LZ77UnCompWram(sTilemap, sOutfitMenu->tilemapBuffers[0]);
+            LZ77UnCompWram(sScrollingBG_Tilemap, sOutfitMenu->tilemapBuffers[1]);
             sOutfitMenu->gfxState++;
         }
         break;
@@ -600,11 +600,10 @@ static void SpriteCB_Indicator(struct Sprite *s)
 
 static inline void ForEachCB_DrawIndicatorSprites(u32 idx, u32 col, u32 row)
 {
-    u32 x, y, i;
+    u32 x, y;
     if (idx >= sOutfitMenu->listCount)
         return;
 
-    i = sOutfitMenu->grid->topLeftItemIndex + idx;
     x = ((col % GRID_COLS) < ARRAY_COUNT(sGridPosX)) ? sGridPosX[col] : sGridPosX[0];
     y = ((row % GRID_ROWS) < ARRAY_COUNT(sGridPosY)) ? sGridPosY[row] : sGridPosY[0];
     x -= 8, y -= 8;
@@ -778,7 +777,7 @@ static void Task_WaitFadeInOutfitMenu(u8 taskId)
 
 static void Task_WaitMessage(u8 taskId)
 {
-    if (!IsTextPrinterActive(WIN_MSGBOX) && (JOY_NEW(A_BUTTON | B_BUTTON) || --gTasks[taskId].data[0] == 0))
+    if (!IsTextPrinterActiveOnWindow(WIN_MSGBOX) && (JOY_NEW(A_BUTTON | B_BUTTON) || --gTasks[taskId].data[0] == 0))
     {
         ClearDialogWindowAndFrame(WIN_MSGBOX, TRUE);
         UpdateOutfitInfo();
@@ -941,25 +940,26 @@ const void *GetPlayerHeadGfxOrPal(u8 which, bool32 isFP)
     {
         u32 tag = GetObjectEventGraphicsInfo(
             GetPlayerAvatarGraphicsIdByStateId(PLAYER_AVATAR_STATE_NORMAL))->paletteTag;
+        const struct SpritePalette *pal = GetObjectEventPaletteFromTag(tag);
 
-        return GetObjectEventPaletteFromTag(tag)->data;
+        if (pal != NULL)
+            return pal->data;
+        return NULL;
     }
-    else
+
+    if (gSaveBlock2Ptr->currOutfitId == OUTFIT_NONE || gSaveBlock2Ptr->currOutfitId >= OUTFIT_COUNT)
     {
-        if (gSaveBlock2Ptr->currOutfitId == OUTFIT_NONE || gSaveBlock2Ptr->currOutfitId >= OUTFIT_COUNT)
-        {
-            gSaveBlock2Ptr->currOutfitId = DEFAULT_OUTFIT;
-        }
-
-        if (isFP)
-        {
-            return gSaveBlock2Ptr->playerGender ?
-                        gOutfits[gSaveBlock2Ptr->currOutfitId].iconsFP + 0x80 :
-                        gOutfits[gSaveBlock2Ptr->currOutfitId].iconsFP;
-        }
-        else
-            return gOutfits[gSaveBlock2Ptr->currOutfitId].iconsRM[gSaveBlock2Ptr->playerGender];
+        gSaveBlock2Ptr->currOutfitId = DEFAULT_OUTFIT;
     }
+
+    if (isFP)
+    {
+        return gSaveBlock2Ptr->playerGender ?
+                    gOutfits[gSaveBlock2Ptr->currOutfitId].iconsFP + 0x80 :
+                    gOutfits[gSaveBlock2Ptr->currOutfitId].iconsFP;
+    }
+
+    return gOutfits[gSaveBlock2Ptr->currOutfitId].iconsRM[gSaveBlock2Ptr->playerGender];
 }
 
 u16 *GetOutfitPointer(u16 id)

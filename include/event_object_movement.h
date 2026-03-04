@@ -253,6 +253,7 @@ u8 GetMoveDirectionFastestAnimNum(enum Direction direction);
 enum Direction GetLedgeJumpDirection(s16 x, s16 y, enum Direction direction);
 void CameraObjectSetFollowedSpriteId(u8 objectId);
 u16 GetObjectPaletteTag(u8 palSlot);
+const struct SpritePalette *GetObjectEventPaletteFromTag(u16 tag);
 void UpdateObjectEventSpriteInvisibility(struct Sprite *sprite, bool8 invisible);
 s16 GetFigure8XOffset(s16 idx);
 s16 GetFigure8YOffset(s16 idx);

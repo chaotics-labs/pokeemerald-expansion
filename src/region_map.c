@@ -22,6 +22,8 @@
 #include "regions.h"
 #include "region_map.h"
 #include "decompress.h"
+#include "data.h"
+#include "outfit_menu.h"
 #include "constants/region_map_sections.h"
 #include "heal_location.h"
 #include "constants/field_specials.h"
@@ -123,10 +125,6 @@ static const u32 sRegionMapCursorLargeGfxLZ[] = INCBIN_U32("graphics/pokenav/reg
 static const u16 sRegionMapBg_Pal[] = INCBIN_U16("graphics/pokenav/region_map/map.gbapal");
 static const u32 sRegionMapBg_GfxLZ[] = INCBIN_U32("graphics/pokenav/region_map/map.8bpp.smol");
 static const u32 sRegionMapBg_TilemapLZ[] = INCBIN_U32("graphics/pokenav/region_map/map.bin.smolTM");
-static const u16 sRegionMapPlayerIcon_BrendanPal[] = INCBIN_U16("graphics/pokenav/region_map/brendan_icon.gbapal");
-static const u8 sRegionMapPlayerIcon_BrendanGfx[] = INCBIN_U8("graphics/pokenav/region_map/brendan_icon.4bpp");
-static const u16 sRegionMapPlayerIcon_MayPal[] = INCBIN_U16("graphics/pokenav/region_map/may_icon.gbapal");
-static const u8 sRegionMapPlayerIcon_MayGfx[] = INCBIN_U8("graphics/pokenav/region_map/may_icon.4bpp");
 static const u16 sRegionMapPlayerIcon_RedPal[] = INCBIN_U16("graphics/pokenav/region_map/red_icon.gbapal");
 static const u8 sRegionMapPlayerIcon_RedGfx[] = INCBIN_U8("graphics/pokenav/region_map/red_icon.4bpp");
 static const u16 sRegionMapPlayerIcon_LeafPal[] = INCBIN_U16("graphics/pokenav/region_map/leaf_icon.gbapal");
@@ -1731,8 +1729,8 @@ static void UNUSED ClearUnkCursorSpriteData(void)
 void CreateRegionMapPlayerIcon(u16 tileTag, u16 paletteTag)
 {
     u8 spriteId;
-    struct SpriteSheet sheet = {sRegionMapPlayerIcon_BrendanGfx, 0x80, tileTag};
-    struct SpritePalette palette = {sRegionMapPlayerIcon_BrendanPal, paletteTag};
+    struct SpriteSheet sheet = {GetPlayerHeadGfxOrPal(GFX, FALSE), 0x80, tileTag};
+    struct SpritePalette palette = {GetPlayerHeadGfxOrPal(PAL, FALSE), paletteTag};
     struct SpriteTemplate template = {tileTag, paletteTag, &sRegionMapPlayerIconOam, sRegionMapPlayerIconAnimTable, NULL, gDummySpriteAffineAnimTable, SpriteCallbackDummy};
 
     if (IsEventIslandMapSecId(gMapHeader.regionMapSectionId))
@@ -1744,11 +1742,6 @@ void CreateRegionMapPlayerIcon(u16 tileTag, u16 paletteTag)
     {
         sheet.data = sRegionMapPlayerIcon_LeafGfx;
         palette.data = sRegionMapPlayerIcon_LeafPal;
-    }
-    else if (gSaveBlock2Ptr->playerGender == FEMALE)
-    {
-        sheet.data = sRegionMapPlayerIcon_MayGfx;
-        palette.data = sRegionMapPlayerIcon_MayPal;
     }
     else if (IS_FRLG)
     {

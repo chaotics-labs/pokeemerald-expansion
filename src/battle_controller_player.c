@@ -32,6 +32,7 @@
 #include "util.h"
 #include "window.h"
 #include "line_break.h"
+#include "outfit_menu.h"
 #include "constants/battle_anim.h"
 #include "constants/battle_move_effects.h"
 #include "constants/battle_partner.h"
@@ -1880,16 +1881,21 @@ static void PlayerHandleLoadMonSprite(enum BattlerId battler)
 enum TrainerPicID LinkPlayerGetTrainerPicId(u32 multiplayerId)
 {
     enum TrainerPicID trainerPicId;
-
     u8 gender = gLinkPlayers[multiplayerId].gender;
     enum GameVersion version = gLinkPlayers[multiplayerId].version & 0xFF;
+    u8 outfitId = gLinkPlayers[multiplayerId].currOutfitId;
 
     if (version == VERSION_FIRE_RED || version == VERSION_LEAF_GREEN)
         trainerPicId = gender + TRAINER_PIC_BACK_RED;
     else if (version == VERSION_RUBY || version == VERSION_SAPPHIRE)
         trainerPicId = gender + TRAINER_PIC_BACK_RUBY_SAPPHIRE_BRENDAN;
     else
-        trainerPicId = gender + TRAINER_PIC_BACK_BRENDAN;
+    {
+        if (outfitId < OUTFIT_COUNT)
+            trainerPicId = GetPlayerTrainerPicIdByOutfitGenderType(outfitId, gender, 1);
+        else
+            trainerPicId = gender + TRAINER_PIC_BACK_BRENDAN;
+    }
 
     return trainerPicId;
 }
@@ -1901,7 +1907,7 @@ static enum TrainerPicID PlayerGetTrainerBackPicId(void)
     if (gBattleTypeFlags & BATTLE_TYPE_LINK)
         trainerPicId = LinkPlayerGetTrainerPicId(GetMultiplayerId());
     else
-        trainerPicId = gSaveBlock2Ptr->playerGender == FEMALE ? TRAINER_BACK_PIC_PLAYER_FEMALE : TRAINER_BACK_PIC_PLAYER_MALE;
+        trainerPicId = GetPlayerTrainerPicIdByOutfitGenderType(gSaveBlock2Ptr->currOutfitId, gSaveBlock2Ptr->playerGender, 1);
 
     return trainerPicId;
 }
@@ -1955,7 +1961,7 @@ static void PlayerHandleDrawTrainerPic(enum BattlerId battler)
     // Use front pic table for any tag battles unless your partner is Steven or a custom partner.
     if (gBattleTypeFlags & BATTLE_TYPE_INGAME_PARTNER && gPartnerTrainerId < TRAINER_PARTNER(PARTNER_NONE))
     {
-        trainerPicId = PlayerGenderToFrontTrainerPicId(gSaveBlock2Ptr->playerGender);
+        trainerPicId = GetPlayerTrainerPicIdByOutfitGenderType(gSaveBlock2Ptr->currOutfitId, gSaveBlock2Ptr->playerGender, 0);
         isFrontPic = TRUE;
     }
     else // Use back pic in all the other usual circumstances.
