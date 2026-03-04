@@ -44,6 +44,7 @@
   - [How to Apricorn Tree](tutorials/how_to_apricorn_tree.md)
   - [How to Namebox](tutorials/how_to_namebox.md)
   - [Vs. Seeker](tutorials/vs_seeker.md)
+  - [How to use the Outfit System](tutorials/how_to_outfit_system.md)
   - [Teachable Learnsets Explanations](tutorials/teachable_learnsets.md)
   - [Struct Pokemon Generation](tutorials/mon_generation.md)
   - [How to use FRLG](tutorials/how_to_frlg.md)
