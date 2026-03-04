@@ -66,6 +66,7 @@ static bool8 IsArrowWarpMetatileBehavior(u16, enum Direction);
 static s8 GetWarpEventAtMapPosition(struct MapHeader *, struct MapPosition *);
 static void SetupWarp(struct MapHeader *, s8, struct MapPosition *);
 static bool8 TryDoorWarp(struct MapPosition *, u16, enum Direction);
+static void TryTogglePlayerAvatarGender(void);
 static s8 GetWarpEventAtPosition(struct MapHeader *, u16, u16, u8);
 static const u8 *GetCoordEventScriptAtPosition(struct MapHeader *, u16, u16, u8);
 static const struct BgEvent *GetBackgroundEventAtPosition(struct MapHeader *, u16, u16, u8);
@@ -232,8 +233,8 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     if (input->tookStep && TryFindHiddenPokemon())
         return TRUE;
 
-    if (input->pressedSelectButton && UseRegisteredKeyItemOnField() == TRUE)
-        return TRUE;
+    if (input->pressedSelectButton)
+        TryTogglePlayerAvatarGender();
 
     if (input->pressedRButton && TryStartDexNavSearch())
         return TRUE;
@@ -254,6 +255,19 @@ int ProcessPlayerFieldInput(struct FieldInput *input)
     }
 
     return FALSE;
+}
+
+static void TryTogglePlayerAvatarGender(void)
+{
+    u16 graphicsId;
+
+    gSaveBlock2Ptr->playerGender = (gSaveBlock2Ptr->playerGender == MALE) ? FEMALE : MALE;
+    gPlayerAvatar.gender = gSaveBlock2Ptr->playerGender;
+
+    graphicsId = GetPlayerAvatarGraphicsIdByCurrentState();
+    SetPlayerAvatarExtraStateTransition(graphicsId, PLAYER_AVATAR_FLAG_CONTROLLABLE);
+
+    PlaySE(SE_SELECT);
 }
 
 static void GetPlayerPosition(struct MapPosition *position)
